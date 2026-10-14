@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BENNY — a modern family tragedy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#fafafa;
+    --ink:#0a0a0a;
+    --line:#e5e5e5;
+    --ink3:#6f6f6f;
+    --serif:'Instrument Serif', Georgia, 'Times New Roman', serif;
+    --sans:'Inter', 'Helvetica Neue', Arial, sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    display:grid;
+    grid-template-rows:auto 1fr auto auto;
+    height:100svh;
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---------- header ---------- */
+  header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 32px;border-bottom:1px solid var(--line);
+  }
+  .brand{font-size:11px;letter-spacing:.22em;text-transform:uppercase;font-weight:600;}
+  .brand em{font-family:var(--serif);font-style:italic;text-transform:none;letter-spacing:0;font-weight:400;color:var(--ink3);font-size:13px;margin-left:10px;}
+  .head-right{display:flex;align-items:center;gap:10px;}
+  .pill{
+    font-family:var(--sans);font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:500;
+    text-decoration:none;color:var(--ink);border:1px solid var(--line);border-radius:999px;
+    padding:9px 18px;transition:background .25s,color .25s,border-color .25s;white-space:nowrap;
+  }
+  .pill:hover{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+  .pill.ghost{border-color:transparent;color:var(--ink3);}
+  .pill.ghost:hover{background:transparent;color:var(--ink);}
+
+  /* ---------- main ---------- */
+  main{
+    display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);
+    min-height:0;padding:0 32px;gap:48px;align-items:center;
+  }
+  .titleblock{padding:24px 0;}
+  h1{
+    font-family:var(--serif);font-weight:400;
+    font-size:clamp(72px,11vw,168px);
+    line-height:.88;letter-spacing:-.015em;
+  }
+  .subtitle{
+    font-family:var(--serif);font-style:italic;font-weight:400;
+    font-size:clamp(20px,2.2vw,30px);color:var(--ink);
+    margin-top:18px;
+  }
+  .meta{
+    margin-top:26px;font-size:12px;line-height:2;color:var(--ink3);
+    letter-spacing:.06em;max-width:34ch;
+  }
+  .meta b{color:var(--ink);font-weight:600;}
+
+  .excerpt{
+    background:#fff;border:1px solid var(--line);
+    padding:clamp(24px,3vw,44px);
+    max-height:100%;overflow:hidden;position:relative;
+    display:flex;flex-direction:column;justify-content:center;
+  }
+  .scene-tag{
+    font-size:10px;letter-spacing:.24em;text-transform:uppercase;font-weight:600;
+    color:var(--ink3);margin-bottom:20px;display:flex;align-items:center;gap:12px;
+  }
+  .scene-tag::after{content:"";flex:1;height:1px;background:var(--line);}
+  .excerpt p{
+    font-family:var(--serif);font-weight:400;
+    font-size:clamp(15px,1.25vw,18px);line-height:1.75;
+    margin-bottom:1em;color:#1a1a1a;
+  }
+  .excerpt p:last-of-type{margin-bottom:0;}
+  .excerpt p.dropcap::first-letter{
+    font-size:3.2em;float:left;line-height:.82;padding:6px 10px 0 0;color:var(--ink);
+  }
+  .excerpt .placeholder-note{
+    margin-top:22px;font-family:var(--sans);font-size:10.5px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--ink3);
+  }
+
+  /* ---------- characters ---------- */
+  .chars{
+    display:grid;grid-template-columns:repeat(4,1fr);
+    border-top:1px solid var(--line);
+  }
+  .char{
+    display:grid;grid-template-columns:auto 1fr;align-items:center;gap:16px;
+    padding:14px 32px;border-right:1px solid var(--line);min-width:0;
+  }
+  .char:last-child{border-right:none;}
+  .char .sq{
+    width:52px;height:52px;flex:none;
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--serif);font-size:26px;color:var(--ink);
+  }
+  .char .name{font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .char .role{font-family:var(--serif);font-style:italic;font-size:13px;color:var(--ink3);margin-top:3px;}
+
+  /* ---------- player ---------- */
+  .player{
+    background:var(--ink);color:var(--paper);
+    display:flex;align-items:center;gap:20px;
+    padding:14px 32px;
+    font-variant-numeric:tabular-nums;
+  }
+  .playbtn{
+    width:44px;height:44px;border-radius:50%;border:none;flex:none;
+    background:var(--paper);color:var(--ink);cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    transition:transform .2s;
+  }
+  .playbtn:hover{transform:scale(1.06);}
+  .playbtn svg{width:16px;height:16px;}
+  .track-info{min-width:0;flex:none;}
+  .track-title{font-size:12px;font-weight:600;letter-spacing:.08em;white-space:nowrap;}
+  .track-sub{font-size:10.5px;color:rgba(250,250,250,.5);letter-spacing:.1em;text-transform:uppercase;margin-top:2px;white-space:nowrap;}
+  .progress-wrap{flex:1;display:flex;align-items:center;min-width:0;}
+  input[type=range]{
+    -webkit-appearance:none;appearance:none;width:100%;height:16px;background:transparent;cursor:pointer;
+  }
+  input[type=range]::-webkit-slider-runnable-track{height:3px;background:rgba(250,250,250,.25);border-radius:2px;}
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;appearance:none;width:13px;height:13px;border-radius:50%;
+    background:var(--paper);margin-top:-5px;border:none;
+    box-shadow:0 0 0 3px rgba(250,250,250,.15);
+  }
+  input[type=range]::-moz-range-track{height:3px;background:rgba(250,250,250,.25);border-radius:2px;}
+  input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;background:var(--paper);border:none;box-shadow:0 0 0 3px rgba(250,250,250,.15);}
+  .times{font-size:11.5px;color:rgba(250,250,250,.65);white-space:nowrap;flex:none;letter-spacing:.05em;}
+
+  /* ---------- responsive ---------- */
+  @media (max-width:960px){
+    body{height:auto;min-height:100svh;overflow:auto;grid-template-rows:auto auto auto auto;}
+    header{padding:14px 20px;flex-wrap:wrap;row-gap:10px;}
+    .brand em{display:none;}
+    .head-right{flex-wrap:wrap;row-gap:6px;}
+    .pill{padding:7px 12px;font-size:10px;}
+    main{grid-template-columns:1fr;gap:24px;padding:0 20px;}
+    .excerpt{padding:24px;}
+    .chars{grid-template-columns:repeat(2,1fr);}
+    .char{border-bottom:1px solid var(--line);padding:12px 20px;}
+    .player{position:sticky;bottom:0;padding:12px 20px;gap:12px;}
+    .track-info{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">Benny<em>a modern family tragedy</em></div>
+  <div class="head-right">
+    <a class="pill" href="#">Kindle — soon</a>
+    <a class="pill" href="#">Paperback — KDP</a>
+    <a class="pill ghost" href="b.html">Direction B &rarr;</a>
+  </div>
+</header>
+
+<main>
+  <div class="titleblock">
+    <h1>Benny</h1>
+    <div class="subtitle">a modern family tragedy</div>
+    <div class="meta">
+      A novella in <b>thirteen scenes</b>.<br>
+      About the voice that moved in,<br>
+      and the family that stayed.<br>
+      <b>Read an excerpt — or listen.</b>
+    </div>
+  </div>
+
+  <div class="excerpt">
+    <div class="scene-tag">Scene VII &middot; Excerpt</div>
+    <p>[Placeholder text — this is where a full passage from one scene sits, roughly 120–180 words, set large with generous leading so it reads like a page from the book rather than a website. One scene per card.]</p>
+    <p>[A second short paragraph can follow if the moment needs air. The card never scrolls — the excerpt is sized to fit the screen, so the passage is chosen or trimmed to what a reader can take in at a glance.]</p>
+    <p>[The closing beat of the excerpt, ending on the line that makes someone want the next scene. Then silence, and the ellipsis.]</p>
+    <div class="placeholder-note">&#183; placeholder copy — your scene text drops in here &#183;</div>
+  </div>
+</main>
+
+<div class="chars">
+  <div class="char">
+    <div class="sq" style="background:#ddd3c0;">B</div>
+    <div><div class="name">Benny</div><div class="role">the voice</div></div>
+  </div>
+  <div class="char">
+    <div class="sq" style="background:#c9cdc4;">R</div>
+    <div><div class="name">Roy</div><div class="role">role placeholder</div></div>
+  </div>
+  <div class="char">
+    <div class="sq" style="background:#c2c8d1;">K</div>
+    <div><div class="name">Kazimir</div><div class="role">role placeholder</div></div>
+  </div>
+  <div class="char">
+    <div class="sq" style="background:#d9cfc4;">&amp;</div>
+    <div><div class="name">Everyone else</div><div class="role">the family, the town</div></div>
+  </div>
+</div>
+
+<div class="player">
+  <button class="playbtn" id="playBtn" aria-label="Play audiobook excerpt">
+    <svg id="iconPlay" viewBox="0 0 16 16" fill="currentColor"><path d="M4 2l10 6-10 6z"/></svg>
+    <svg id="iconPause" viewBox="0 0 16 16" fill="currentColor" style="display:none;"><path d="M3 2h4v12H3zM9 2h4v12H9z"/></svg>
+  </button>
+  <div class="track-info">
+    <div class="track-title">BENNY — Audiobook</div>
+    <div class="track-sub">placeholder ambience track</div>
+  </div>
+  <div class="progress-wrap">
+    <input type="range" id="seek" min="0" max="100" step="0.1" value="0" aria-label="Seek">
+  </div>
+  <div class="times"><span id="tCur">0:00</span>&nbsp;/&nbsp;<span id="tTot">0:20</span></div>
+</div>
+
+<audio id="audio" src="assets/benny-listen-placeholder.mp3" preload="metadata"></audio>
+
+<script>
+(function(){
+  var audio=document.getElementById('audio'),
+      btn=document.getElementById('playBtn'),
+      ip=document.getElementById('iconPlay'),
+      ipa=document.getElementById('iconPause'),
+      seek=document.getElementById('seek'),
+      tCur=document.getElementById('tCur'),
+      tTot=document.getElementById('tTot');
+  function fmt(s){if(!isFinite(s))return'0:00';var m=Math.floor(s/60),ss=Math.floor(s%60);return m+':'+(ss<10?'0':'')+ss;}
+  audio.addEventListener('loadedmetadata',function(){tTot.textContent=fmt(audio.duration);});
+  btn.addEventListener('click',function(){
+    if(audio.paused){audio.play();}else{audio.pause();}
+  });
+  audio.addEventListener('play',function(){ip.style.display='none';ipa.style.display='block';});
+  audio.addEventListener('pause',function(){ip.style.display='block';ipa.style.display='none';});
+  audio.addEventListener('timeupdate',function(){
+    if(audio.duration){seek.value=(audio.currentTime/audio.duration)*100;}
+    tCur.textContent=fmt(audio.currentTime);
+  });
+  seek.addEventListener('input',function(){
+    if(audio.duration){audio.currentTime=(seek.value/100)*audio.duration;}
+  });
+})();
+</script>
+</body>
+</html>

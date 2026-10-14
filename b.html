@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BENNY — a modern family tragedy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#161818;
+    --fg:#ffffff;
+    --muted:rgba(255,255,255,.55);
+    --faint:rgba(255,255,255,.32);
+    --line:hsla(163,6%,77%,.1);
+    --serif:'Instrument Serif', Georgia, 'Times New Roman', serif;
+    --sans:'Inter', 'Helvetica Neue', Arial, sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    background:var(--bg);color:var(--fg);
+    font-family:var(--sans);
+    display:grid;grid-template-rows:auto 1fr auto auto;
+    height:100svh;overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+    font-variant-numeric:tabular-nums;
+  }
+  .noise{
+    position:fixed;inset:0;z-index:50;pointer-events:none;
+    background:url('assets/noise.png');background-size:1600px 900px;
+    opacity:.05;
+  }
+
+  /* ---------- header ---------- */
+  header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 32px;border-bottom:1px solid var(--line);
+    position:relative;z-index:2;
+  }
+  .brand{font-size:11px;letter-spacing:.22em;text-transform:uppercase;font-weight:600;white-space:nowrap;}
+  .brand span{color:var(--muted);font-weight:400;}
+  .head-right{display:flex;align-items:center;gap:22px;}
+  .tlink{
+    font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:500;
+    color:var(--muted);text-decoration:none;border-bottom:1px solid transparent;
+    padding-bottom:2px;transition:color .2s,border-color .2s;white-space:nowrap;
+  }
+  .tlink:hover{color:var(--fg);border-color:var(--fg);}
+
+  /* ---------- main ---------- */
+  main{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:clamp(22px,4vh,44px);padding:24px 32px;min-height:0;position:relative;z-index:2;
+    text-align:center;
+  }
+  .kicker{font-size:10.5px;letter-spacing:.3em;text-transform:uppercase;color:var(--faint);font-weight:600;}
+
+  .playerblock{display:flex;align-items:center;gap:clamp(16px,3vw,32px);}
+  .playbtn{
+    width:76px;height:76px;border-radius:50%;flex:none;
+    border:1px solid rgba(255,255,255,.35);background:transparent;color:var(--fg);
+    cursor:pointer;display:flex;align-items:center;justify-content:center;
+    transition:background .25s,transform .2s,border-color .25s;
+  }
+  .playbtn:hover{background:rgba(255,255,255,.08);transform:scale(1.04);}
+  .playbtn.playing{background:var(--fg);color:var(--bg);border-color:var(--fg);}
+  .playbtn svg{width:22px;height:22px;}
+
+  .wave{
+    display:flex;align-items:center;gap:3px;height:76px;
+    -webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);
+    mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);
+  }
+  .wave span{
+    display:block;width:3px;height:100%;border-radius:2px;background:var(--fg);
+    transform:scaleY(.12);transform-origin:center;opacity:.9;
+  }
+  .wave.live span{animation:flow 1.1s ease-in-out infinite alternate;}
+  @keyframes flow{from{transform:scaleY(.1);}to{transform:scaleY(1);}}
+  .timesline{font-size:11px;color:var(--muted);letter-spacing:.08em;white-space:nowrap;}
+  .progressline{
+    width:clamp(160px,24vw,320px);height:2px;background:rgba(255,255,255,.14);
+    border-radius:2px;cursor:pointer;position:relative;
+  }
+  .progressline i{position:absolute;left:0;top:0;bottom:0;width:0%;background:var(--fg);border-radius:2px;display:block;}
+
+  /* ---------- fragment ---------- */
+  .fragment{max-width:680px;min-height:9em;display:flex;flex-direction:column;justify-content:center;}
+  .scene-label{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--faint);font-weight:600;margin-bottom:18px;}
+  .quote{
+    font-family:var(--serif);font-style:italic;font-weight:400;
+    font-size:clamp(20px,2.6vw,30px);line-height:1.5;color:var(--fg);
+  }
+  .quote .ph{color:var(--muted);}
+  .fragment-nav{
+    display:flex;align-items:center;justify-content:center;gap:26px;margin-top:26px;
+  }
+  .arrow{
+    background:none;border:none;color:var(--fg);cursor:pointer;
+    font-family:var(--serif);font-size:26px;line-height:1;padding:4px 10px;
+    opacity:.55;transition:opacity .2s,transform .2s;
+  }
+  .arrow:hover{opacity:1;transform:translateY(-1px);}
+  .counter{font-size:11.5px;letter-spacing:.2em;color:var(--muted);min-width:5.5em;}
+
+  /* ---------- characters ---------- */
+  .chars{
+    display:grid;grid-template-columns:repeat(4,1fr);
+    border-top:1px solid var(--line);position:relative;z-index:2;
+  }
+  .char{
+    display:grid;grid-template-columns:auto 1fr;align-items:center;gap:14px;
+    padding:14px 32px;border-right:1px solid var(--line);min-width:0;text-align:left;
+  }
+  .char:last-child{border-right:none;}
+  .char .sq{
+    width:48px;height:48px;flex:none;background:rgba(255,255,255,.05);
+    border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--serif);font-size:24px;color:var(--fg);
+  }
+  .char .name{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .char .role{font-family:var(--serif);font-style:italic;font-size:12.5px;color:var(--muted);margin-top:3px;}
+
+  /* ---------- footer ---------- */
+  footer{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 32px;border-top:1px solid var(--line);
+    font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);
+    position:relative;z-index:2;
+  }
+
+  /* ---------- responsive ---------- */
+  html,body{overflow-x:hidden;}
+  @media (max-width:960px){
+    body{height:auto;min-height:100svh;overflow-y:auto;}
+    header{padding:14px 20px;flex-wrap:wrap;gap:8px 14px;row-gap:8px;}
+    .brand{flex:1 1 100%;}
+    .head-right{flex:1 1 100%;max-width:100%;flex-wrap:wrap;row-gap:6px;gap:12px;}
+    .tlink{font-size:10px;}
+    .kicker{font-size:9px;letter-spacing:.22em;}
+    .playerblock{flex-wrap:wrap;justify-content:center;row-gap:16px;}
+    .fragment{width:100%;}
+    .quote{font-size:19px;padding:0 6px;}
+    main{padding:32px 16px;}
+    .wave{width:38vw;overflow:hidden;}
+    .chars{grid-template-columns:repeat(2,1fr);}
+    .char{border-bottom:1px solid var(--line);padding:12px 20px;}
+    footer{flex-wrap:wrap;gap:8px;}
+  }
+</style>
+</head>
+<body>
+<div class="noise"></div>
+
+<header>
+  <div class="brand">Benny &nbsp;<span>&mdash;&nbsp; a modern family tragedy</span></div>
+  <div class="head-right">
+    <a class="tlink" href="#">Kindle &mdash; next week</a>
+    <a class="tlink" href="#">Paperback &mdash; KDP</a>
+    <a class="tlink" href="index.html">Direction A &rarr;</a>
+  </div>
+</header>
+
+<main>
+  <div class="kicker">A novella in thirteen scenes &nbsp;&middot;&nbsp; with the audiobook edition</div>
+
+  <div class="playerblock">
+    <button class="playbtn" id="playBtn" aria-label="Play audiobook excerpt">
+      <svg id="iconPlay" viewBox="0 0 16 16" fill="currentColor"><path d="M3.5 1.5l10 6.5-10 6.5z"/></svg>
+      <svg id="iconPause" viewBox="0 0 16 16" fill="currentColor" style="display:none;"><path d="M3 2h3.6v12H3zM9.4 2H13v12H9.4z"/></svg>
+    </button>
+    <div class="wave" id="wave" aria-hidden="true"></div>
+    <div>
+      <div class="progressline" id="progress"><i id="progressFill"></i></div>
+      <div class="timesline" style="margin-top:8px;"><span id="tCur">0:00</span> / <span id="tTot">0:20</span></div>
+    </div>
+  </div>
+
+  <div class="fragment">
+    <div class="scene-label" id="sceneLabel">Scene I</div>
+    <div class="quote" id="quote"></div>
+    <div class="fragment-nav">
+      <button class="arrow" id="prev" aria-label="Previous excerpt">&lsaquo;</button>
+      <div class="counter" id="counter">1 / 13</div>
+      <button class="arrow" id="next" aria-label="Next excerpt">&rsaquo;</button>
+    </div>
+  </div>
+</main>
+
+<div class="chars">
+  <div class="char">
+    <div class="sq">B</div>
+    <div><div class="name">Benny</div><div class="role">the voice</div></div>
+  </div>
+  <div class="char">
+    <div class="sq">R</div>
+    <div><div class="name">Roy</div><div class="role">role placeholder</div></div>
+  </div>
+  <div class="char">
+    <div class="sq">K</div>
+    <div><div class="name">Kazimir</div><div class="role">role placeholder</div></div>
+  </div>
+  <div class="char">
+    <div class="sq">&amp;</div>
+    <div><div class="name">Everyone else</div><div class="role">the family, the town</div></div>
+  </div>
+</div>
+
+<footer>
+  <div>Set in the present tense</div>
+  <div>Excerpts &middot; Audio &middot; Thirteen scenes</div>
+</footer>
+
+<audio id="audio" src="assets/benny-listen-placeholder.mp3" preload="metadata" crossorigin="anonymous"></audio>
+
+<script>
+(function(){
+  /* ---------- fragments ---------- */
+  var fragments=[
+    {scene:"Scene I",   text:"[ Excerpt placeholder — the opening image, before anyone speaks. One to three sentences. ]"},
+    {scene:"Scene II",  text:"[ Excerpt placeholder — the first time the voice does something a machine shouldn't know how to do. ]"},
+    {scene:"Scene III", text:"[ Excerpt placeholder — a domestic moment played straight, no commentary. ]"},
+    {scene:"Scene IV",  text:"[ Excerpt placeholder — Roy's line. The one readers will underline. ]"},
+    {scene:"Scene V",   text:"[ Excerpt placeholder — a short exchange, question and deflection. ]"},
+    {scene:"Scene VI",  text:"[ Excerpt placeholder — the town, the weather, the ordinary weight of it. ]"},
+    {scene:"Scene VII", text:"[ Excerpt placeholder — a beat of quiet. Fragments can be short; white space is allowed. ]"},
+    {scene:"Scene VIII",text:"[ Excerpt placeholder — the first breadcrumb, planted where nobody looks. ]"},
+    {scene:"Scene IX",  text:"[ Excerpt placeholder — Kazimir, holding a sentence longer than he should. ]"},
+    {scene:"Scene X",   text:"[ Excerpt placeholder — the family at a table, everyone talking past everyone. ]"},
+    {scene:"Scene XI",  text:"[ Excerpt placeholder — the confession, trimmed to its load-bearing words. ]"},
+    {scene:"Scene XII", text:"[ Excerpt placeholder — the turn. Whatever is said here cannot be taken back. ]"},
+    {scene:"Scene XIII",text:"[ Excerpt placeholder — the rifle, the field, the last line of the book. ]"}
+  ];
+  var idx=0;
+  var sceneLabel=document.getElementById('sceneLabel'),
+      quote=document.getElementById('quote'),
+      counter=document.getElementById('counter');
+  function roman(n){return ["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII","XIII"][n];}
+  function render(){
+    var f=fragments[idx];
+    sceneLabel.textContent=f.scene;
+    quote.innerHTML='<span class="ph">&ldquo;'+f.text+'&rdquo;</span>';
+    counter.textContent=(idx+1)+' / 13';
+  }
+  document.getElementById('prev').addEventListener('click',function(){idx=(idx+12)%13;render();});
+  document.getElementById('next').addEventListener('click',function(){idx=(idx+1)%13;render();});
+  render();
+
+  /* ---------- waveform ---------- */
+  var wave=document.getElementById('wave'),bars=[],i;
+  for(i=0;i<32;i++){
+    var s=document.createElement('span');
+    s.style.animationDuration=(0.7+Math.random()*0.9).toFixed(2)+'s';
+    s.style.animationDelay=(-Math.random()*1.2).toFixed(2)+'s';
+    wave.appendChild(s);bars.push(s);
+  }
+  var analyser=null,data=null,ctx=null,raf=null,cssFallback=false;
+  function startWave(){
+    if(cssFallback){wave.classList.add('live');return;}
+    try{
+      if(!ctx){
+        var AC=window.AudioContext||window.webkitAudioContext;
+        ctx=new AC();
+        var src=ctx.createMediaElementSource(audio);
+        analyser=ctx.createAnalyser();
+        analyser.fftSize=256;
+        src.connect(analyser);analyser.connect(ctx.destination);
+        data=new Uint8Array(analyser.frequencyBinCount);
+      }
+      ctx.resume();
+      cancelAnimationFrame(raf);
+      (function draw(){
+        analyser.getByteFrequencyData(data);
+        for(var j=0;j<bars.length;j++){
+          var v=data[Math.floor(j*data.length/bars.length)]/255;
+          bars[j].style.transform='scaleY('+Math.max(.08,v).toFixed(3)+')';
+        }
+        raf=requestAnimationFrame(draw);
+      })();
+    }catch(e){cssFallback=true;wave.classList.add('live');}
+  }
+  function stopWave(){
+    if(cssFallback){wave.classList.remove('live');return;}
+    cancelAnimationFrame(raf);
+    for(var j=0;j<bars.length;j++){bars[j].style.transform='scaleY(.12)';}
+  }
+
+  /* ---------- player ---------- */
+  var audio=document.getElementById('audio'),
+      btn=document.getElementById('playBtn'),
+      ip=document.getElementById('iconPlay'),
+      ipa=document.getElementById('iconPause'),
+      tCur=document.getElementById('tCur'),
+      tTot=document.getElementById('tTot'),
+      progress=document.getElementById('progress'),
+      fill=document.getElementById('progressFill');
+  function fmt(s){if(!isFinite(s))return'0:00';var m=Math.floor(s/60),ss=Math.floor(s%60);return m+':'+(ss<10?'0':'')+ss;}
+  audio.addEventListener('loadedmetadata',function(){tTot.textContent=fmt(audio.duration);});
+  btn.addEventListener('click',function(){
+    if(audio.paused){audio.play();}else{audio.pause();}
+  });
+  audio.addEventListener('play',function(){ip.style.display='none';ipa.style.display='block';btn.classList.add('playing');startWave();});
+  audio.addEventListener('pause',function(){ip.style.display='block';ipa.style.display='none';btn.classList.remove('playing');stopWave();});
+  audio.addEventListener('ended',function(){ip.style.display='block';ipa.style.display='none';btn.classList.remove('playing');stopWave();});
+  audio.addEventListener('timeupdate',function(){
+    if(audio.duration){fill.style.width=(audio.currentTime/audio.duration*100)+'%';}
+    tCur.textContent=fmt(audio.currentTime);
+  });
+  progress.addEventListener('click',function(e){
+    if(!audio.duration)return;
+    var r=progress.getBoundingClientRect();
+    audio.currentTime=((e.clientX-r.left)/r.width)*audio.duration;
+  });
+})();
+</script>
+</body>
+</html>
