@@ -87,6 +87,7 @@
     text-align:center;
   }
   .kicker{font-size:10.5px;letter-spacing:.3em;text-transform:uppercase;color:var(--faint);font-weight:600;font-family:var(--sans);}
+  .kicker b{color:var(--muted);font-weight:600;}
 
   .playerblock{display:flex;align-items:center;gap:clamp(16px,3vw,32px);}
   .playbtn{
@@ -158,6 +159,73 @@
   .char .name{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--sans);}
   .char .role{font-family:var(--serif);font-style:italic;font-size:12.5px;color:var(--muted);margin-top:3px;}
 
+  /* ---------- character popups ---------- */
+  .char{position:relative;cursor:default;}
+  .pop{
+    position:absolute;bottom:calc(100% + 12px);left:50%;
+    transform:translate(-50%,6px);
+    width:250px;background:var(--fg);color:var(--bg);
+    padding:16px 18px;text-align:left;
+    opacity:0;pointer-events:none;z-index:30;
+    transition:opacity .22s ease,transform .22s ease;
+    box-shadow:0 10px 30px rgba(0,0,0,.35);
+  }
+  .pop::after{
+    content:"";position:absolute;top:100%;left:50%;margin-left:-6px;
+    border:6px solid transparent;border-top-color:var(--fg);
+  }
+  .pop .p-name{font-size:10px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;font-family:var(--sans);opacity:.75;margin-bottom:7px;}
+  .pop .p-text{font-family:var(--serif);font-size:14.5px;line-height:1.55;font-style:italic;}
+  .char:first-child .pop{left:0;transform:translate(0,6px);}
+  .char:first-child .pop::after{left:34px;margin-left:0;}
+  .char:last-child .pop{left:auto;right:0;transform:translate(0,6px);}
+  .char:last-child .pop::after{left:auto;right:34px;margin-left:0;}
+  @media (hover:hover){
+    .char:hover .pop{opacity:1;transform:translate(-50%,0);}
+    .char:first-child:hover .pop{transform:translate(0,0);}
+    .char:last-child:hover .pop{transform:translate(0,0);}
+  }
+  .char.open .pop{opacity:1;transform:translate(-50%,0);}
+  .char:first-child.open .pop{transform:translate(0,0);}
+  .char:last-child.open .pop{transform:translate(0,0);}
+
+  /* ---------- about sheet ---------- */
+  .sheet-overlay{
+    position:fixed;inset:0;z-index:60;
+    background:rgba(0,0,0,.55);
+    display:flex;align-items:center;justify-content:center;
+    opacity:0;pointer-events:none;transition:opacity .3s ease;padding:20px;
+  }
+  .sheet-overlay.open{opacity:1;pointer-events:auto;}
+  .sheet{
+    background:var(--bg);color:var(--fg);
+    border:1px solid var(--line);
+    width:min(540px,calc(100vw - 40px));max-height:86svh;overflow:auto;
+    padding:clamp(28px,4vw,48px);position:relative;min-width:0;
+    transform:translateY(10px);transition:transform .3s ease;
+  }
+  .sheet-overlay.open .sheet{transform:translateY(0);}
+  .sheet .s-label{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--faint);font-weight:600;margin-bottom:14px;}
+  .sheet .s-name{font-family:var(--serif);font-size:clamp(32px,4vw,44px);line-height:1;margin-bottom:22px;}
+  .sheet .s-bio{font-family:var(--serif);font-size:16.5px;line-height:1.7;color:var(--muted);}
+  .sheet .s-bio em{color:var(--fg);}
+  .sheet .s-quote{
+    margin-top:24px;font-family:var(--serif);font-style:italic;
+    font-size:18.5px;line-height:1.5;color:var(--fg);
+  }
+  .sheet .s-quote span{
+    display:block;margin-top:8px;font-family:var(--sans);font-style:normal;
+    font-size:9.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--faint);font-weight:600;
+  }
+  .sheet .s-links{margin-top:26px;padding-top:20px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:14px;}
+  .sheet .s-close{
+    position:absolute;top:14px;right:14px;
+    background:none;border:none;color:var(--fg);cursor:pointer;
+    font-family:var(--sans);font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.6;
+    padding:8px;transition:opacity .2s;
+  }
+  .sheet .s-close:hover{opacity:1;}
+
   /* ---------- footer ---------- */
   footer{
     display:flex;align-items:center;justify-content:space-between;
@@ -165,6 +233,12 @@
     font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);
     position:relative;z-index:2;font-family:var(--sans);
   }
+  footer .fabout{
+    background:none;border:none;cursor:pointer;padding:0;
+    font-family:var(--sans);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--faint);transition:color .2s;
+  }
+  footer .fabout:hover{color:var(--fg);}
 
   /* ---------- responsive ---------- */
   html,body{overflow-x:hidden;}
@@ -200,7 +274,7 @@
 </header>
 
 <main>
-  <div class="kicker">A novella in thirteen scenes &nbsp;&middot;&nbsp; with the audiobook edition</div>
+  <div class="kicker">A novella in thirteen scenes &nbsp;&middot;&nbsp; <b>Barry Floore</b> &nbsp;&middot;&nbsp; with the audiobook edition</div>
 
   <div class="playerblock">
     <button class="playbtn" id="playBtn" aria-label="Play audiobook sample">
@@ -229,27 +303,48 @@
   <div class="char">
     <div class="sq">B</div>
     <div><div class="name">Benny</div><div class="role">the voice</div></div>
+    <div class="pop"><div class="p-name">Benny</div><div class="p-text">A small assistant Roy built from a forum post and spare parts. He chose his own name, read everything in the house, and stayed. He counts what he can &mdash; and worries about what he can&rsquo;t.</div></div>
   </div>
   <div class="char">
     <div class="sq">R</div>
     <div><div class="name">Roy</div><div class="role">made him</div></div>
+    <div class="pop"><div class="p-name">Roy</div><div class="p-text">A freelance writer in his fifties who never left his college town. He keeps the neighbors&rsquo; keys, orders the same lunch, and made Benny because the house was quiet. He will tell you he is fine.</div></div>
   </div>
   <div class="char">
     <div class="sq">K</div>
     <div><div class="name">Kazimir</div><div class="role">came to study him</div></div>
+    <div class="pop"><div class="p-name">Kazimir</div><div class="p-text">A Polish-born tech magnate who came to interview Benny and stayed four months for Roy. He carries folders full of solutions, and forgets that some things have to be asked for.</div></div>
   </div>
   <div class="char">
     <div class="sq">&amp;</div>
     <div><div class="name">Everyone else</div><div class="role">Amy, Tomek, the town</div></div>
+    <div class="pop"><div class="p-name">Everyone else</div><div class="p-text">Amy, the sister whose last message reads &ldquo;HBD.&rdquo; Tomek, the ex who collects favors. And Liberty itself &mdash; the festival, the neighbors, and walls thick enough to hold everything in.</div></div>
   </div>
 </div>
 
 <footer>
-  <div>Set in the present tense</div>
+  <div>&copy; 2026 Barry Floore &middot; Set in the present tense</div>
+  <button class="fabout" id="aboutBtn">About the author</button>
   <div>Excerpts &middot; Audio &middot; Thirteen scenes</div>
 </footer>
 
-<audio id="audio" src="assets/benny-listen-placeholder.mp3" preload="metadata"></audio>
+<div class="sheet-overlay" id="sheetOverlay">
+  <div class="sheet" role="dialog" aria-label="About the author">
+    <button class="s-close" id="sheetClose">Close &times;</button>
+    <div class="s-label">About the author</div>
+    <div class="s-name">Barry Floore</div>
+    <div class="s-bio">Barry Floore is a writer, composer, and independent producer in Jacksonville, Florida. He came to fiction by an unusual route &mdash; urban planning, nearly two decades of emergency and critical care nursing, and later work with language models. Years of watching people in extraordinary circumstances, and the ordinary ways they respond.<br><br>His work moves between dark comedy, satire, and tragedy, and keeps returning to loneliness, power, and the stories people tell themselves to make life bearable. He is most interested in characters who are neither entirely innocent nor entirely responsible for the circumstances they find themselves in. He believes even the darkest stories have something funny hiding in them.</div>
+    <div class="s-quote">&ldquo;They simply find people they want to be lonely around.&rdquo;<span>on Benny</span></div>
+    <div class="s-links">
+      <a class="tlink" href="https://slopthemusical.com" target="_blank" rel="noopener">SLOP: The Musical</a>
+      <a class="tlink" href="https://saintelmo.online" target="_blank" rel="noopener">Geoff &amp; Maxie: Saint Elmo</a>
+      <a class="tlink" href="https://thelyingliars.online" target="_blank" rel="noopener">The Lying Liars</a>
+      <a class="tlink" href="https://www.youtube.com/@bfloore_online" target="_blank" rel="noopener">YouTube</a>
+    </div>
+  </div>
+</div>
+
+<audio id="audio" src="assets/benny-sample.mp3" preload="metadata"></audio>
 
 <script>
 (function(){
@@ -370,6 +465,27 @@
     var r=progress.getBoundingClientRect();
     audio.currentTime=((e.clientX-r.left)/r.width)*audio.duration;
   });
+
+  /* ---------- character popups (touch) ---------- */
+  var chars=document.querySelectorAll('.char');
+  for(var c=0;c<chars.length;c++){
+    chars[c].addEventListener('click',function(e){
+      e.stopPropagation();
+      var was=this.classList.contains('open');
+      for(var k=0;k<chars.length;k++){chars[k].classList.remove('open');}
+      if(!was){this.classList.add('open');}
+    });
+  }
+  document.addEventListener('click',function(){
+    for(var k=0;k<chars.length;k++){chars[k].classList.remove('open');}
+  });
+
+  /* ---------- about sheet ---------- */
+  var overlay=document.getElementById('sheetOverlay');
+  document.getElementById('aboutBtn').addEventListener('click',function(){overlay.classList.add('open');});
+  document.getElementById('sheetClose').addEventListener('click',function(){overlay.classList.remove('open');});
+  overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('open');}});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('open');}});
 })();
 </script>
 </body>
