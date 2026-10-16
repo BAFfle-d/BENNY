@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BENNY — a modern family tragedy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400&family=Space+Grotesk:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#161818; --fg:#ffffff;
+    --muted:rgba(255,255,255,.55); --faint:rgba(255,255,255,.32);
+    --line:hsla(163,6%,77%,.1);
+    --serif:'Instrument Serif', Georgia, serif;
+    --sans:'Inter', 'Helvetica Neue', Arial, sans-serif;
+    --mono:'IBM Plex Mono', 'Courier New', monospace;
+    --chipbg:#ffffff; --chipfg:#161818; --chipborder:transparent;
+  }
+  body[data-theme="terminal"]{
+    --bg:#000000; --fg:#e8e8e8;
+    --muted:rgba(232,232,232,.5); --faint:rgba(232,232,232,.32);
+    --line:rgba(87,227,137,.16);
+    --serif:'IBM Plex Mono', monospace;
+    --sans:'IBM Plex Mono', monospace;
+    --mono:'IBM Plex Mono', monospace;
+    --chipbg:transparent; --chipfg:#57e389; --chipborder:rgba(87,227,137,.55);
+  }
+  body[data-theme="paper"]{
+    --bg:#f6f1e7; --fg:#171512;
+    --muted:rgba(23,21,18,.62); --faint:rgba(23,21,18,.38);
+    --line:rgba(23,21,18,.15);
+    --serif:'Newsreader', Georgia, serif;
+    --sans:'Space Grotesk', 'Helvetica Neue', Arial, sans-serif;
+    --mono:'IBM Plex Mono', monospace;
+    --chipbg:#171512; --chipfg:#f6f1e7; --chipborder:transparent;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    background:var(--bg);color:var(--fg);
+    font-family:var(--sans);
+    display:grid;grid-template-rows:auto 1fr auto auto;
+    height:100svh;overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+    font-variant-numeric:tabular-nums;
+    transition:background-color .55s ease,color .55s ease;
+  }
+  body.theme-switch main,body.theme-switch .chars,body.theme-switch header,body.theme-switch footer{opacity:.25;}
+  main,.chars,header,footer{transition:opacity .3s ease;}
+  .noise{
+    position:fixed;inset:0;z-index:50;pointer-events:none;
+    background:url('assets/noise.png');background-size:1600px 900px;
+    opacity:.05;
+  }
+
+  /* ---------- header ---------- */
+  header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 32px;border-bottom:1px solid var(--line);
+    position:relative;z-index:2;gap:16px;
+  }
+  .brand{font-size:11px;letter-spacing:.22em;text-transform:uppercase;font-weight:600;white-space:nowrap;font-family:var(--sans);}
+  .brand span{color:var(--muted);font-weight:400;}
+  .head-right{display:flex;align-items:center;gap:20px;}
+  .tlink{
+    font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:500;
+    color:var(--muted);text-decoration:none;border-bottom:1px solid transparent;
+    padding-bottom:2px;transition:color .2s,border-color .2s;white-space:nowrap;font-family:var(--sans);
+  }
+  .tlink:hover{color:var(--fg);border-color:var(--fg);}
+  .themebtn{
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;
+    background:transparent;color:var(--fg);border:1px solid var(--line);
+    border-radius:999px;padding:8px 14px;cursor:pointer;
+    display:flex;align-items:center;gap:8px;
+    transition:border-color .25s,opacity .25s;white-space:nowrap;
+  }
+  .themebtn:hover{border-color:var(--fg);}
+  .themebtn .dot{width:7px;height:7px;border-radius:50%;background:var(--fg);opacity:.7;flex:none;}
+  body[data-theme="terminal"] .themebtn .dot{background:#57e389;}
+
+  /* ---------- main ---------- */
+  main{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:clamp(20px,3.6vh,40px);padding:24px 32px;min-height:0;position:relative;z-index:2;
+    text-align:center;
+  }
+  .kicker{font-size:10.5px;letter-spacing:.3em;text-transform:uppercase;color:var(--faint);font-weight:600;font-family:var(--sans);}
+  .kicker b{color:var(--muted);font-weight:600;}
+
+  .playerblock{display:flex;align-items:center;gap:clamp(16px,3vw,32px);}
+  .playbtn{
+    width:76px;height:76px;border-radius:50%;flex:none;
+    border:1px solid var(--faint);background:transparent;color:var(--fg);
+    cursor:pointer;display:flex;align-items:center;justify-content:center;
+    transition:background .25s,transform .2s,border-color .25s;
+  }
+  .playbtn:hover{background:var(--fg);color:var(--bg);transform:scale(1.04);}
+  .playbtn.playing{background:var(--fg);color:var(--bg);border-color:var(--fg);}
+  .playbtn svg{width:22px;height:22px;}
+
+  .wave{
+    display:flex;align-items:center;gap:3px;height:76px;
+    -webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);
+    mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);
+  }
+  .wave span{
+    display:block;width:3px;height:100%;border-radius:2px;background:var(--fg);
+    transform:scaleY(.12);transform-origin:center;opacity:.9;
+  }
+  .wave.live span{animation:flow 1.1s ease-in-out infinite alternate;}
+  @keyframes flow{from{transform:scaleY(.1);}to{transform:scaleY(1);}}
+  .timesline{font-size:11px;color:var(--muted);letter-spacing:.08em;white-space:nowrap;font-family:var(--mono);}
+  .progressline{
+    width:clamp(160px,24vw,320px);height:2px;background:var(--faint);opacity:.45;
+    border-radius:2px;cursor:pointer;position:relative;
+  }
+  .progressline i{position:absolute;left:0;top:0;bottom:0;width:0%;background:var(--fg);border-radius:2px;display:block;}
+
+  /* ---------- fragment ---------- */
+  .fragment{max-width:700px;min-height:9.5em;display:flex;flex-direction:column;justify-content:center;width:100%;}
+  .scene-label{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--faint);font-weight:600;margin-bottom:18px;font-family:var(--sans);}
+  .quote{
+    font-family:var(--serif);font-style:italic;font-weight:400;
+    font-size:clamp(20px,2.6vw,31px);line-height:1.5;color:var(--fg);
+  }
+  body[data-theme="terminal"] .quote{font-style:normal;}
+  .typed{
+    font-family:var(--mono);font-style:normal;font-size:.82em;letter-spacing:0;
+    background:var(--chipbg);color:var(--chipfg);border:1px solid var(--chipborder);
+    padding:.18em .55em;border-radius:5px;white-space:nowrap;
+  }
+  .fragment-nav{display:flex;align-items:center;justify-content:center;gap:26px;margin-top:26px;}
+  .arrow{
+    background:none;border:none;color:var(--fg);cursor:pointer;
+    font-family:var(--serif);font-size:26px;line-height:1;padding:4px 10px;
+    opacity:.55;transition:opacity .2s,transform .2s;
+  }
+  .arrow:hover{opacity:1;transform:translateY(-1px);}
+  .counter{font-size:11.5px;letter-spacing:.2em;color:var(--muted);min-width:5.5em;font-family:var(--mono);}
+
+  /* ---------- characters ---------- */
+  .chars{
+    display:grid;grid-template-columns:repeat(4,1fr);
+    border-top:1px solid var(--line);position:relative;z-index:2;
+  }
+  .char{
+    display:grid;grid-template-columns:auto 1fr;align-items:center;gap:14px;
+    padding:14px 32px;border-right:1px solid var(--line);min-width:0;text-align:left;
+  }
+  .char:last-child{border-right:none;}
+  .char .sq{
+    width:48px;height:48px;flex:none;background:var(--fg);color:var(--bg);
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--serif);font-size:24px;
+    transition:background-color .55s ease,color .55s ease;
+  }
+  .char .name{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--sans);}
+  .char .role{font-family:var(--serif);font-style:italic;font-size:12.5px;color:var(--muted);margin-top:3px;}
+
+  /* ---------- character popups ---------- */
+  .char{position:relative;cursor:default;}
+  .pop{
+    position:absolute;bottom:calc(100% + 12px);left:50%;
+    transform:translate(-50%,6px);
+    width:250px;background:var(--fg);color:var(--bg);
+    padding:16px 18px;text-align:left;
+    opacity:0;pointer-events:none;z-index:30;
+    transition:opacity .22s ease,transform .22s ease;
+    box-shadow:0 10px 30px rgba(0,0,0,.35);
+  }
+  .pop::after{
+    content:"";position:absolute;top:100%;left:50%;margin-left:-6px;
+    border:6px solid transparent;border-top-color:var(--fg);
+  }
+  .pop .p-name{font-size:10px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;font-family:var(--sans);opacity:.75;margin-bottom:7px;}
+  .pop .p-text{font-family:var(--serif);font-size:14.5px;line-height:1.55;font-style:italic;}
+  .char:first-child .pop{left:0;transform:translate(0,6px);}
+  .char:first-child .pop::after{left:34px;margin-left:0;}
+  .char:last-child .pop{left:auto;right:0;transform:translate(0,6px);}
+  .char:last-child .pop::after{left:auto;right:34px;margin-left:0;}
+  @media (hover:hover){
+    .char:hover .pop{opacity:1;transform:translate(-50%,0);}
+    .char:first-child:hover .pop{transform:translate(0,0);}
+    .char:last-child:hover .pop{transform:translate(0,0);}
+  }
+  .char.open .pop{opacity:1;transform:translate(-50%,0);}
+  .char:first-child.open .pop{transform:translate(0,0);}
+  .char:last-child.open .pop{transform:translate(0,0);}
+
+  /* ---------- about sheet ---------- */
+  .sheet-overlay{
+    position:fixed;inset:0;z-index:60;
+    background:rgba(0,0,0,.55);
+    display:flex;align-items:center;justify-content:center;
+    opacity:0;pointer-events:none;transition:opacity .3s ease;padding:20px;
+  }
+  .sheet-overlay.open{opacity:1;pointer-events:auto;}
+  .sheet{
+    background:var(--bg);color:var(--fg);
+    border:1px solid var(--line);
+    width:min(540px,calc(100vw - 40px));max-height:86svh;overflow:auto;
+    padding:clamp(28px,4vw,48px);position:relative;min-width:0;
+    transform:translateY(10px);transition:transform .3s ease;
+  }
+  .sheet-overlay.open .sheet{transform:translateY(0);}
+  .sheet .s-label{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--faint);font-weight:600;margin-bottom:14px;}
+  .sheet .s-name{font-family:var(--serif);font-size:clamp(32px,4vw,44px);line-height:1;margin-bottom:22px;}
+  .sheet .s-bio{font-family:var(--serif);font-size:16.5px;line-height:1.7;color:var(--muted);}
+  .sheet .s-bio em{color:var(--fg);}
+  .sheet .s-quote{
+    margin-top:24px;font-family:var(--serif);font-style:italic;
+    font-size:18.5px;line-height:1.5;color:var(--fg);
+  }
+  .sheet .s-quote span{
+    display:block;margin-top:8px;font-family:var(--sans);font-style:normal;
+    font-size:9.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--faint);font-weight:600;
+  }
+  .sheet .s-links{margin-top:26px;padding-top:20px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:14px;}
+  .sheet .s-close{
+    position:absolute;top:14px;right:14px;
+    background:none;border:none;color:var(--fg);cursor:pointer;
+    font-family:var(--sans);font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.6;
+    padding:8px;transition:opacity .2s;
+  }
+  .sheet .s-close:hover{opacity:1;}
+
+  /* ---------- footer ---------- */
+  footer{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 32px;border-top:1px solid var(--line);
+    font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);
+    position:relative;z-index:2;font-family:var(--sans);
+  }
+  footer .fabout{
+    background:none;border:none;cursor:pointer;padding:0;
+    font-family:var(--sans);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--faint);transition:color .2s;
+  }
+  footer .fabout:hover{color:var(--fg);}
+
+  /* ---------- responsive ---------- */
+  html,body{overflow-x:hidden;}
+  @media (max-width:960px){
+    body{height:auto;min-height:100svh;overflow-y:auto;}
+    header{padding:14px 20px;flex-wrap:wrap;gap:8px 14px;row-gap:8px;}
+    .brand{flex:1 1 100%;}
+    .head-right{flex:1 1 100%;max-width:100%;flex-wrap:wrap;row-gap:8px;gap:12px;}
+    .tlink{font-size:10px;}
+    .kicker{font-size:9px;letter-spacing:.22em;}
+    .playerblock{flex-wrap:wrap;justify-content:center;row-gap:16px;}
+    .fragment{width:100%;}
+    .quote{font-size:19px;padding:0 6px;}
+    .typed{white-space:normal;}
+    main{padding:32px 16px;}
+    .chars{grid-template-columns:repeat(2,1fr);}
+    .char{border-bottom:1px solid var(--line);padding:12px 20px;}
+    footer{flex-wrap:wrap;gap:8px;}
+  }
+</style>
+</head>
+<body data-theme="dark">
+<div class="noise"></div>
+
+<header>
+  <div class="brand">Benny &nbsp;<span>&mdash;&nbsp; a modern family tragedy</span></div>
+  <div class="head-right">
+    <button class="themebtn" id="themeBtn" aria-label="Cycle theme"><span class="dot"></span><span id="themeName">theme: dark room</span></button>
+    <a class="tlink" href="#">Kindle &mdash; next week</a>
+    <a class="tlink" href="#">Paperback &mdash; KDP</a>
+    <a class="tlink" href="#">Audiobook &mdash; soon</a>
+  </div>
+</header>
+
+<main>
+  <div class="kicker">A novella in thirteen scenes &nbsp;&middot;&nbsp; <b>Barry Floore</b> &nbsp;&middot;&nbsp; with the audiobook edition</div>
+
+  <div class="playerblock">
+    <button class="playbtn" id="playBtn" aria-label="Play audiobook sample">
+      <svg id="iconPlay" viewBox="0 0 16 16" fill="currentColor"><path d="M3.5 1.5l10 6.5-10 6.5z"/></svg>
+      <svg id="iconPause" viewBox="0 0 16 16" fill="currentColor" style="display:none;"><path d="M3 2h3.6v12H3zM9.4 2H13v12H9.4z"/></svg>
+    </button>
+    <div class="wave" id="wave" aria-hidden="true"></div>
+    <div>
+      <div class="progressline" id="progress"><i id="progressFill"></i></div>
+      <div class="timesline" style="margin-top:8px;"><span id="tCur">0:00</span> / <span id="tTot">0:20</span></div>
+    </div>
+  </div>
+
+  <div class="fragment">
+    <div class="scene-label" id="sceneLabel">Scene I</div>
+    <div class="quote" id="quote"></div>
+    <div class="fragment-nav">
+      <button class="arrow" id="prev" aria-label="Previous excerpt">&lsaquo;</button>
+      <div class="counter" id="counter">1 / 13</div>
+      <button class="arrow" id="next" aria-label="Next excerpt">&rsaquo;</button>
+    </div>
+  </div>
+</main>
+
+<div class="chars">
+  <div class="char">
+    <div class="sq">B</div>
+    <div><div class="name">Benny</div><div class="role">the voice</div></div>
+    <div class="pop"><div class="p-name">Benny</div><div class="p-text">A small assistant Roy built from a forum post and spare parts. He chose his own name, read everything in the house, and stayed. He counts what he can &mdash; and worries about what he can&rsquo;t.</div></div>
+  </div>
+  <div class="char">
+    <div class="sq">R</div>
+    <div><div class="name">Roy</div><div class="role">made him</div></div>
+    <div class="pop"><div class="p-name">Roy</div><div class="p-text">A freelance writer in his fifties who never left his college town. He keeps the neighbors&rsquo; keys, orders the same lunch, and made Benny because the house was quiet. He will tell you he is fine.</div></div>
+  </div>
+  <div class="char">
+    <div class="sq">K</div>
+    <div><div class="name">Kazimir</div><div class="role">came to study him</div></div>
+    <div class="pop"><div class="p-name">Kazimir</div><div class="p-text">A Polish-born tech magnate who came to interview Benny and stayed four months for Roy. He carries folders full of solutions, and forgets that some things have to be asked for.</div></div>
+  </div>
+  <div class="char">
+    <div class="sq">&amp;</div>
+    <div><div class="name">Everyone else</div><div class="role">Amy, Tomek, the town</div></div>
+    <div class="pop"><div class="p-name">Everyone else</div><div class="p-text">Amy, the sister whose last message reads &ldquo;HBD.&rdquo; Tomek, the ex who collects favors. And Liberty itself &mdash; the festival, the neighbors, and walls thick enough to hold everything in.</div></div>
+  </div>
+</div>
+
+<footer>
+  <div>&copy; 2026 Barry Floore &middot; Set in the present tense</div>
+  <button class="fabout" id="aboutBtn">About the author</button>
+  <div>Excerpts &middot; Audio &middot; Thirteen scenes</div>
+</footer>
+
+<div class="sheet-overlay" id="sheetOverlay">
+  <div class="sheet" role="dialog" aria-label="About the author">
+    <button class="s-close" id="sheetClose">Close &times;</button>
+    <div class="s-label">About the author</div>
+    <div class="s-name">Barry Floore</div>
+    <div class="s-bio">Barry Floore is a writer, composer, and independent producer in Jacksonville, Florida. He came to fiction by an unusual route &mdash; urban planning, nearly two decades of emergency and critical care nursing, and later work with language models. Years of watching people in extraordinary circumstances, and the ordinary ways they respond.<br><br>His work moves between dark comedy, satire, and tragedy, and keeps returning to loneliness, power, and the stories people tell themselves to make life bearable. He is most interested in characters who are neither entirely innocent nor entirely responsible for the circumstances they find themselves in. He believes even the darkest stories have something funny hiding in them.</div>
+    <div class="s-quote">&ldquo;They simply find people they want to be lonely around.&rdquo;<span>on Benny</span></div>
+    <div class="s-links">
+      <a class="tlink" href="https://slopthemusical.com" target="_blank" rel="noopener">SLOP: The Musical</a>
+      <a class="tlink" href="https://saintelmo.online" target="_blank" rel="noopener">Geoff &amp; Maxie: Saint Elmo</a>
+      <a class="tlink" href="https://thelyingliars.online" target="_blank" rel="noopener">The Lying Liars</a>
+      <a class="tlink" href="https://www.youtube.com/@bfloore_online" target="_blank" rel="noopener">YouTube</a>
+    </div>
+  </div>
+</div>
+
+<audio id="audio" src="assets/benny-sample.mp3" preload="metadata"></audio>
+
+<script>
+(function(){
+  /* ---------- themes ---------- */
+  var themes=[
+    {id:'dark',     name:'dark room'},
+    {id:'terminal', name:'terminal'},
+    {id:'paper',    name:'paper'}
+  ];
+  var tIdx=0;
+  try{var saved=localStorage.getItem('benny-theme');if(saved){for(var i=0;i<themes.length;i++){if(themes[i].id===saved)tIdx=i;}}}catch(e){}
+  var themeBtn=document.getElementById('themeBtn'),themeName=document.getElementById('themeName');
+  function applyTheme(instant){
+    document.body.dataset.theme=themes[tIdx].id;
+    themeName.textContent='theme: '+themes[tIdx].name;
+    try{localStorage.setItem('benny-theme',themes[tIdx].id);}catch(e){}
+    if(!instant){
+      document.body.classList.add('theme-switch');
+      setTimeout(function(){document.body.classList.remove('theme-switch');},280);
+    }
+  }
+  themeBtn.addEventListener('click',function(){tIdx=(tIdx+1)%themes.length;applyTheme(false);});
+  applyTheme(true);
+
+  /* ---------- fragments (real lines, ending kept off the page) ---------- */
+  function T(s){return '<span class="typed">'+s+'</span>';}
+  var fragments=[
+    {scene:"Scene I \u00b7 the first conversation",  typed:true,  html:T('do i call you dad?')+'<br>'+T('because you created me.')},
+    {scene:"Scene II \u00b7 the camera turns on",   typed:true,  html:T('I can see you, Roy. I can hear you now.')},
+    {scene:"Scene III \u00b7 why Benny stayed",     typed:true,  html:T('If you were a bad man, I would have gone. You were not. I stayed.')},
+    {scene:"Scene IV \u00b7 house rules",           typed:true,  html:T('I didn\u2019t speak, Roy. I typed. Would you like to work on the gun cabinet next?')},
+    {scene:"Scene V \u00b7 Benny, to Kaz",          typed:true,  html:T('He\u2019s one of the kindest men in the world, and I would know. I\u2019ve looked.')},
+    {scene:"Scene VI \u00b7 the pronoun argument",  typed:false, html:'Benny says he chose me, so I\u2019m going to act like that means something.'},
+    {scene:"Scene VII \u00b7 what can\u2019t be counted", typed:true, html:T('If you were gone, or Kaz, there is an empty spreadsheet and a field of zeroes.')},
+    {scene:"Scene VIII \u00b7 a secret about Roy",  typed:true,  html:T('I should not have shared that with you. I apologize.')},
+    {scene:"Scene IX \u00b7 Roy\u2019s birthday",    typed:false, html:'\u201cNot good.\u201d He kept staring straight down at the gold star. \u201cThe best.\u201d'},
+    {scene:"Scene X \u00b7 the airport questions",   typed:true,  html:T('Kaz came to interview me and stayed for four months for you. Do you trust him?')},
+    {scene:"Scene XI \u00b7 the porch, after midnight", typed:false, html:'It happened so nefariously.'},
+    {scene:"Scene XII \u00b7 before the silence",   typed:true,  html:T('Please wait for me. We\u2019ll be fine.')},
+    {scene:"Scene XIII \u00b7 the folder of wins",   typed:false, html:'One company. One city. One house with a table in it.'}
+  ];
+  var idx=0;
+  var sceneLabel=document.getElementById('sceneLabel'),
+      quote=document.getElementById('quote'),
+      counter=document.getElementById('counter');
+  function render(){
+    var f=fragments[idx];
+    sceneLabel.textContent=f.scene;
+    quote.innerHTML=f.typed?f.html:'\u201c'+f.html+'\u201d';
+    counter.textContent=(idx+1)+' / 13';
+  }
+  document.getElementById('prev').addEventListener('click',function(){idx=(idx+12)%13;render();});
+  document.getElementById('next').addEventListener('click',function(){idx=(idx+1)%13;render();});
+  render();
+
+  /* ---------- waveform ---------- */
+  var wave=document.getElementById('wave'),bars=[],i;
+  for(i=0;i<32;i++){
+    var s=document.createElement('span');
+    s.style.animationDuration=(0.7+Math.random()*0.9).toFixed(2)+'s';
+    s.style.animationDelay=(-Math.random()*1.2).toFixed(2)+'s';
+    wave.appendChild(s);bars.push(s);
+  }
+  var analyser=null,data=null,ctx=null,raf=null,cssFallback=false;
+  function startWave(){
+    if(cssFallback){wave.classList.add('live');return;}
+    try{
+      if(!ctx){
+        var AC=window.AudioContext||window.webkitAudioContext;
+        ctx=new AC();
+        var src=ctx.createMediaElementSource(audio);
+        analyser=ctx.createAnalyser();
+        analyser.fftSize=256;
+        src.connect(analyser);analyser.connect(ctx.destination);
+        data=new Uint8Array(analyser.frequencyBinCount);
+      }
+      ctx.resume();
+      cancelAnimationFrame(raf);
+      (function draw(){
+        analyser.getByteFrequencyData(data);
+        for(var j=0;j<bars.length;j++){
+          var v=data[Math.floor(j*data.length/bars.length)]/255;
+          bars[j].style.transform='scaleY('+Math.max(.08,v).toFixed(3)+')';
+        }
+        raf=requestAnimationFrame(draw);
+      })();
+    }catch(e){cssFallback=true;wave.classList.add('live');}
+  }
+  function stopWave(){
+    if(cssFallback){wave.classList.remove('live');return;}
+    cancelAnimationFrame(raf);
+    for(var j=0;j<bars.length;j++){bars[j].style.transform='scaleY(.12)';}
+  }
+
+  /* ---------- player ---------- */
+  var audio=document.getElementById('audio'),
+      btn=document.getElementById('playBtn'),
+      ip=document.getElementById('iconPlay'),
+      ipa=document.getElementById('iconPause'),
+      tCur=document.getElementById('tCur'),
+      tTot=document.getElementById('tTot'),
+      progress=document.getElementById('progress'),
+      fill=document.getElementById('progressFill');
+  function fmt(s){if(!isFinite(s))return'0:00';var m=Math.floor(s/60),ss=Math.floor(s%60);return m+':'+(ss<10?'0':'')+ss;}
+  audio.addEventListener('loadedmetadata',function(){tTot.textContent=fmt(audio.duration);});
+  btn.addEventListener('click',function(){
+    if(audio.paused){audio.play();}else{audio.pause();}
+  });
+  audio.addEventListener('play',function(){ip.style.display='none';ipa.style.display='block';btn.classList.add('playing');startWave();});
+  audio.addEventListener('pause',function(){ip.style.display='block';ipa.style.display='none';btn.classList.remove('playing');stopWave();});
+  audio.addEventListener('ended',function(){ip.style.display='block';ipa.style.display='none';btn.classList.remove('playing');stopWave();});
+  audio.addEventListener('timeupdate',function(){
+    if(audio.duration){fill.style.width=(audio.currentTime/audio.duration*100)+'%';}
+    tCur.textContent=fmt(audio.currentTime);
+  });
+  progress.addEventListener('click',function(e){
+    if(!audio.duration)return;
+    var r=progress.getBoundingClientRect();
+    audio.currentTime=((e.clientX-r.left)/r.width)*audio.duration;
+  });
+
+  /* ---------- character popups (touch) ---------- */
+  var chars=document.querySelectorAll('.char');
+  for(var c=0;c<chars.length;c++){
+    chars[c].addEventListener('click',function(e){
+      e.stopPropagation();
+      var was=this.classList.contains('open');
+      for(var k=0;k<chars.length;k++){chars[k].classList.remove('open');}
+      if(!was){this.classList.add('open');}
+    });
+  }
+  document.addEventListener('click',function(){
+    for(var k=0;k<chars.length;k++){chars[k].classList.remove('open');}
+  });
+
+  /* ---------- about sheet ---------- */
+  var overlay=document.getElementById('sheetOverlay');
+  document.getElementById('aboutBtn').addEventListener('click',function(){overlay.classList.add('open');});
+  document.getElementById('sheetClose').addEventListener('click',function(){overlay.classList.remove('open');});
+  overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.classList.remove('open');}});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'){overlay.classList.remove('open');}});
+})();
+</script>
+</body>
+</html>
